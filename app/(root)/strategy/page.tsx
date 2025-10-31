@@ -1,147 +1,180 @@
-import { Metadata } from "next";
-// Removed unused lucide-react imports
+"use client";
 
-export const metadata: Metadata = {
-  title: "Strategy Center - MountView",
-  description: "查看和管理您的投资策略",
-};
+import { useState } from "react";
+import TradingViewWidget from "@/components/TradingViewWidget";
+import { CANDLE_CHART_WIDGET_CONFIG } from "@/lib/constants";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 export default function StrategyPage() {
-  const faqs = [
-    {
-      question: "Is OpenStock really free forever?",
-      answer:
-        "Yes! We're part of the Open Dev Society, which means we'll never lock knowledge behind paywalls. Core features remain free always. We run on community donations and the belief that financial tools should be accessible to everyone.",
-    },
-    {
-      question: "I'm a student - can I use this for my projects?",
-      answer:
-        "Absolutely! That's exactly why we built this. Use it for school projects, learning, or building your portfolio. Need help? Our community loves mentoring students. Email student@opendevsociety.org for extra support.",
-    },
-    {
-      question: "How do I add stocks to my favorites?",
-      answer:
-        "Navigate to any stock page and click the star icon. You can also search using the search bar and add directly from results. Everything is designed to be intuitive - no complex tutorials needed.",
-    },
-    {
-      question: "Can I contribute to OpenStock?",
-      answer:
-        "We'd love that! OpenStock is open source and community-driven. Check our GitHub for issues marked 'good first issue' or 'help wanted'. Every contribution, no matter how small, makes a difference.",
-    },
-    {
-      question: "What if I find a bug or have a feature request?",
-      answer:
-        "Please tell us! Submit issues on GitHub, join our Discord, or email opendevsociety@gmail.com. We see every report as a chance to make the platform better for everyone.",
-    },
-  ];
+  const [isTopPanelCollapsed, setIsTopPanelCollapsed] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState("BTCUSDT");
+
+  const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
+
+  // 币种列表
+  const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"];
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-100 mb-4">
-          Community Help Center
-        </h1>
-        <p className="text-xl text-gray-200 mb-4">
-          Free help, guided by community, powered by the belief that everyone
-          deserves support
-        </p>
-        <div className="bg-green-300 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto">
-          <p className="text-black text-sm">
-            🤝 <strong>Our Promise:</strong> Every question matters. Every
-            beginner is welcomed. No exclusion, ever.
-          </p>
-        </div>
-      </div>
-
-      {/* Help Philosophy */}
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
-        <div className="bg-gray-800 rounded-lg shadow-sm p-6 border hover:shadow-md transition-shadow">
-          <h3 className="text-lg font-semibold text-blue-500 mb-2">
-            Learn Together
-          </h3>
-          <p className="text-gray-200 text-sm">
-            Every expert was once a beginner. Our guides are written by the
-            community, for the community. No jargon, no assumptions about prior
-            knowledge.
-          </p>
+    <div className="flex flex-col min-h-screen">
+      {/* 顶部面板 - 可向上收缩 */}
+      <div
+        className={`
+          transition-all duration-300 overflow-hidden
+          ${isTopPanelCollapsed ? "h-12" : "h-auto"}
+        `}
+      >
+        {/* 收缩/展开按钮 */}
+        <div className="flex justify-between items-center bg-gray-800 border-b border-gray-700 px-4 py-2">
+          <h2 className="text-lg font-semibold text-gray-100">策略控制面板</h2>
+          <button
+            onClick={() => setIsTopPanelCollapsed(!isTopPanelCollapsed)}
+            className="bg-gray-700 hover:bg-gray-600 rounded-lg p-2 transition-colors"
+            aria-label={isTopPanelCollapsed ? "展开面板" : "收缩面板"}
+          >
+            {isTopPanelCollapsed ? (
+              <ChevronDown className="w-5 h-5 text-gray-200" />
+            ) : (
+              <ChevronUp className="w-5 h-5 text-gray-200" />
+            )}
+          </button>
         </div>
 
-        <div className="bg-gray-800 rounded-lg shadow-sm p-6 border hover:shadow-md transition-shadow">
-          <h3 className="text-lg font-semibold text-green-500 mb-2">
-            Community Support
-          </h3>
-          <p className="text-gray-200 text-sm">
-            Real people helping real people. Our Discord community includes
-            students, professionals, and mentors who genuinely want to help you
-            succeed.
-          </p>
-        </div>
-
-        <div className="bg-gray-800 rounded-lg shadow-sm p-6 border hover:shadow-md transition-shadow">
-          <h3 className="text-lg font-semibold text-purple-500 mb-2">
-            Built with Care
-          </h3>
-          <p className="text-gray-200 text-sm">
-            Every feature is designed with accessibility and ease-of-use in
-            mind. We believe powerful tools should be simple to use.
-          </p>
-        </div>
-      </div>
-
-      {/* Community FAQs */}
-      <section className="mb-12">
-        <h2 className="text-3xl font-bold text-gray-100 mb-8 text-center">
-          Community Questions
-        </h2>
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              key={index}
-              className="bg-gray-800 rounded-lg shadow-sm p-6 border"
-            >
-              <h3 className="text-lg font-semibold text-gray-100 mb-2">
-                {faq.question}
+        {/* 面板内容 - 只在展开时显示 */}
+        {!isTopPanelCollapsed && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-800">
+            {/* 资产统计 */}
+            <section className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+              <h3 className="text-md font-semibold text-gray-100 mb-3">
+                资产统计
               </h3>
-              <p className="text-gray-200">{faq.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+              <div className="space-y-2 text-sm text-gray-200">
+                <div className="flex justify-between">
+                  <span>总资产:</span>
+                  <span className="font-semibold">$10,000</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>可用余额:</span>
+                  <span>$5,000</span>
+                </div>
+              </div>
+            </section>
 
-      {/* Community Connection */}
-      <section className="bg-gradient-to-r from-blue-200 to-purple-200 rounded-lg p-8 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Join Our Community
-        </h2>
-        <p className="text-gray-700 mb-6">
-          Don&apos;t struggle alone. Our community of builders, learners, and
-          dreamers is here to help. Because we believe the future belongs to
-          those who build it openly.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="https://discord.gg/jdJuEMvk"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-550 transition-colors text-center inline-block"
-          >
-            Join Discord Community
-          </a>
+            {/* 收益统计 */}
+            <section className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+              <h3 className="text-md font-semibold text-gray-100 mb-3">
+                收益统计
+              </h3>
+              <div className="space-y-2 text-sm text-gray-200">
+                <div className="flex justify-between">
+                  <span>今日收益:</span>
+                  <span className="text-green-500">+2.5%</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>总收益:</span>
+                  <span className="text-green-500">+15.8%</span>
+                </div>
+              </div>
+            </section>
 
-          <a
-            href="mailto:opendevsociety@gmail.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-gray-800 text-gray-200 px-6 py-3 rounded-lg hover:bg-gray-900 transition-colors text-center inline-block"
-          >
-            Email Help Team
-          </a>
-        </div>
-        <p className="text-xs text-gray-600 mt-4">
-          ✨ All support is free, always. We&apos;re here because we care, not
-          for profit.
-        </p>
-      </section>
+            {/* 订阅币种列表 */}
+            <section className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+              <h3 className="text-md font-semibold text-gray-100 mb-3">
+                订阅币种
+              </h3>
+              <div className="space-y-2">
+                {symbols.map((symbol) => (
+                  <div
+                    key={symbol}
+                    onClick={() => setSelectedSymbol(symbol)}
+                    className={`
+                      text-sm p-2 rounded cursor-pointer transition-colors
+                      ${
+                        selectedSymbol === symbol
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-200 hover:bg-gray-700"
+                      }
+                    `}
+                  >
+                    {symbol}
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+      </div>
+
+      {/* 主内容区 - K线图表占据全屏 */}
+      <div className="flex-1 p-4">
+        <TradingViewWidget
+          title={`${selectedSymbol} K线图表`}
+          scriptUrl={`${scriptUrl}advanced-chart.js`}
+          config={CANDLE_CHART_WIDGET_CONFIG(selectedSymbol)}
+          height={700}
+        />
+      </div>
+
+      {/* 底部区域 - 当前持仓和历史交易 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+        {/* 当前持仓 */}
+        <section className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-100 mb-4">当前持仓</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-gray-200">
+              <thead className="border-b border-gray-700">
+                <tr>
+                  <th className="text-left p-2">交易对</th>
+                  <th className="text-right p-2">开仓价</th>
+                  <th className="text-right p-2">当前价</th>
+                  <th className="text-right p-2">收益率</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-700">
+                  <td className="p-2">BTC/USDT</td>
+                  <td className="text-right p-2">$45,000</td>
+                  <td className="text-right p-2">$46,500</td>
+                  <td className="text-right p-2 text-green-500">+3.3%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* 历史交易记录 */}
+        <section className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-100 mb-4">历史交易</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-gray-200">
+              <thead className="border-b border-gray-700">
+                <tr>
+                  <th className="text-left p-2">交易对</th>
+                  <th className="text-right p-2">开仓价</th>
+                  <th className="text-right p-2">平仓价</th>
+                  <th className="text-right p-2">收益率</th>
+                  <th className="text-right p-2">时间</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-700">
+                  <td className="p-2">ETH/USDT</td>
+                  <td className="text-right p-2">$2,500</td>
+                  <td className="text-right p-2">$2,650</td>
+                  <td className="text-right p-2 text-green-500">+6.0%</td>
+                  <td className="text-right p-2">2025-10-29</td>
+                </tr>
+                <tr className="border-b border-gray-700">
+                  <td className="p-2">BNB/USDT</td>
+                  <td className="text-right p-2">$300</td>
+                  <td className="text-right p-2">$315</td>
+                  <td className="text-right p-2 text-green-500">+5.0%</td>
+                  <td className="text-right p-2">2025-10-28</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

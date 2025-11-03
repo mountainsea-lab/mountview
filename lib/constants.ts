@@ -96,6 +96,67 @@ export const MARKET_OVERVIEW_WIDGET_CONFIG = {
   showChart: true, // display mini chart
 };
 
+import { UDFCompatibleDatafeed } from "../datafeeds/udf-compatible-datafeed";
+
+export const DATAFEED_URL = "http://localhost:5000";
+// Mv TradingView Charts
+export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
+  symbol: string = "BINANCE:BTCUSDT",
+) => {
+  const isBrowser = typeof window !== "undefined";
+
+  return {
+    symbol: symbol.toUpperCase(),
+    interval: "1D",
+    timezone: "Asia/Shanghai",
+    theme: "dark",
+    locale: "zh",
+    container_id: `mv_chart_container_${symbol}`,
+    fullscreen: false,
+    autosize: true,
+    height: 600,
+    width: "100%",
+    datafeed: isBrowser
+      ? new UDFCompatibleDatafeed("http://localhost:5000")
+      : null,
+    disabled_features: [
+      "use_localstorage_for_settings",
+      "header_compare",
+      "header_undo_redo",
+      "symbol_info",
+    ],
+    enabled_features: [
+      "study_templates",
+      "items_favoriting",
+      "save_chart_properties_to_local_storage",
+    ],
+    // supported_resolutions: ["1", "5", "15", "30", "60", "1D", "1W", "1M"],
+    supported_resolutions: ["1", "5", "15"],
+    overrides: {
+      "paneProperties.background": "#141414",
+      "paneProperties.vertGridProperties.color": "rgba(240,243,250,0.05)",
+      "paneProperties.horzGridProperties.color": "rgba(240,243,250,0.05)",
+      "symbolWatermarkProperties.transparency": 90,
+      "scalesProperties.textColor": "#DBDBDB",
+      "mainSeriesProperties.candleStyle.upColor": "#0FEDBE",
+      "mainSeriesProperties.candleStyle.downColor": "#FF4976",
+      "mainSeriesProperties.candleStyle.borderUpColor": "#0FEDBE",
+      "mainSeriesProperties.candleStyle.borderDownColor": "#FF4976",
+    },
+    studies_overrides: {
+      "volume.volume.color.0": "#FF4976",
+      "volume.volume.color.1": "#0FEDBE",
+    },
+    custom_indicators_getter: async () => [],
+    custom_css_url: "/charting_library/custom-theme.css",
+    toolbar_bg: "#1a1a1a",
+    drawings_access: {
+      type: "black",
+      tools: [{ name: "Regression Trend" }],
+    },
+  } as const;
+};
+
 export const HEATMAP_WIDGET_CONFIG = {
   dataSource: "SPX500",
   blockSize: "market_cap_basic",

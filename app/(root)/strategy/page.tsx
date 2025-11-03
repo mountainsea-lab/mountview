@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import TradingViewWidget from "@/components/TradingViewWidget";
-import { CANDLE_CHART_WIDGET_CONFIG } from "@/lib/constants";
+import MvTradingViewWidget from "@/components/MvTradingViewWidget";
+import { MV_MARKET_OVERVIEW_WIDGET_CONFIG } from "@/lib/constants";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export default function StrategyPage() {
   const [isTopPanelCollapsed, setIsTopPanelCollapsed] = useState(false);
   const [selectedSymbol, setSelectedSymbol] = useState("BTCUSDT");
 
-  const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
+  const scriptUrl = `/charting_library/`;
 
   // 币种列表
   const symbols = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT"];
@@ -106,10 +106,10 @@ export default function StrategyPage() {
 
       {/* 主内容区 - K线图表占据全屏 */}
       <div className="flex-1 p-4">
-        <TradingViewWidget
+        <MvTradingViewWidget
           title={`${selectedSymbol} K线图表`}
-          scriptUrl={`${scriptUrl}advanced-chart.js`}
-          config={CANDLE_CHART_WIDGET_CONFIG(selectedSymbol)}
+          scriptUrl={`${scriptUrl}charting_library.standalone.js`}
+          config={MV_MARKET_OVERVIEW_WIDGET_CONFIG(selectedSymbol)}
           height={700}
         />
       </div>

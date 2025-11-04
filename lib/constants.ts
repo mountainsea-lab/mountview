@@ -115,9 +115,11 @@ export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
     height: 600,
     width: "100%",
     library_path: "/charting_library/", // ✅ 关键
-    client_id: "sssddkk", // 可自定义，非空
-    user_id: "1", // 可自定义，非空
-    user_name: "test", // 可自定义，非空
+    // client_id: "sssddkk", // 可自定义，非空
+    // user_id: "1", // 可自定义，非空
+    // user_name: "test", // 可自定义，非空
+    client: "web", // ✅
+    user: "anonymous", // ✅
     datafeed: isBrowser
       ? new UDFCompatibleDatafeed("http://localhost:10099")
       : null,
@@ -126,9 +128,9 @@ export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
       "header_compare",
       "header_undo_redo",
       "symbol_info",
+      "study_templates",
     ],
     enabled_features: [
-      "study_templates",
       "items_favoriting",
       "save_chart_properties_to_local_storage",
     ],

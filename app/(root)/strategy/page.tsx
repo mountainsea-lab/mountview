@@ -105,14 +105,21 @@ export default function StrategyPage() {
       </div>
 
       {/* 主内容区 - K线图表占据全屏 */}
-      <div className="flex-1 p-4">
+      {/*<div className="flex-1 p-4">
         <MvTradingViewWidget
           title={`${selectedSymbol} K线图表`}
           scriptUrl={`${scriptUrl}charting_library.standalone.js`}
           config={MV_MARKET_OVERVIEW_WIDGET_CONFIG(selectedSymbol)}
           height={700}
         />
-      </div>
+      </div>*/}
+      <MvTradingViewWidget
+        key={`${selectedSymbol} K线图表`} // 每次 symbol 切换重新挂载组件
+        title={`${selectedSymbol} K线图表`}
+        scriptUrl={`${scriptUrl}charting_library.standalone.js`}
+        config={MV_MARKET_OVERVIEW_WIDGET_CONFIG(selectedSymbol)}
+        height={700}
+      />
 
       {/* 底部区域 - 当前持仓和历史交易 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">

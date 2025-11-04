@@ -1,64 +1,77 @@
 "use client";
-import { useEffect, useRef } from "react";
 
-const useMvTradingViewWidget = (
+import { useEffect, useRef, useCallback } from "react";
+
+declare global {
+  interface Window {
+    TradingView?: any;
+  }
+}
+
+export default function useMvTradingViewWidget(
   scriptUrl: string,
   config: Record<string, any>,
-  height = 600,
-) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const widgetRef = useRef<any>(null); // TradingView widget 实例
+  height: number,
+) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const loadScript = useCallback(() => {
+    return new Promise<void>((resolve, reject) => {
+      if (window.TradingView) {
+        resolve();
+        return;
+      }
+      const existing = document.querySelector<HTMLScriptElement>(
+        `script[src="${scriptUrl}"]`,
+      );
+      if (existing) {
+        existing.addEventListener("load", () => resolve());
+        existing.addEventListener("error", () => reject());
+        return;
+      }
 
-    // 清理旧 widget
-    if (widgetRef.current) {
-      widgetRef.current.remove?.();
-      containerRef.current.innerHTML = "";
-      widgetRef.current = null;
-    }
-
-    // 创建 widget 容器
-    const widgetContainer = document.createElement("div");
-    widgetContainer.className = "tradingview-widget-container__widget";
-    widgetContainer.style.width = "100%";
-    widgetContainer.style.height = `${height}px`;
-    containerRef.current.appendChild(widgetContainer);
-
-    const isBrowser = typeof window !== "undefined";
-    if (!isBrowser) return;
-
-    const initWidget = () => {
-      widgetRef.current = new (window as any).TradingView.widget({
-        ...config,
-        container_id: widgetContainer,
-      });
-    };
-
-    // 动态加载 TradingView 脚本
-    if (!(window as any).TradingView) {
       const script = document.createElement("script");
       script.src = scriptUrl;
       script.async = true;
-      script.onload = initWidget;
-      containerRef.current.appendChild(script);
-    } else {
-      initWidget();
-    }
+      script.onload = () => resolve();
+      script.onerror = (err) => reject(err);
+      document.body.appendChild(script);
+    });
+  }, [scriptUrl]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let isMounted = true;
+
+    const initWidget = async () => {
+      await loadScript();
+      if (!isMounted || !window.TradingView || !containerRef.current) return;
+
+      // 清理旧实例
+      if (widgetRef.current?.remove) widgetRef.current.remove();
+
+      widgetRef.current = new window.TradingView.widget({
+        ...config,
+        container: containerRef.current, // ✅ 用 DOM 元素，不用 id
+        height,
+      });
+    };
+
+    initWidget();
 
     return () => {
-      if (widgetRef.current) {
-        widgetRef.current.remove?.();
-        widgetRef.current = null;
-      }
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
-      }
+      isMounted = false;
+      if (widgetRef.current?.remove) widgetRef.current.remove();
     };
-  }, [scriptUrl, config, height]);
+  }, [loadScript, config, height]);
+
+  useEffect(() => {
+    if (!widgetRef.current || !config?.symbol) return;
+    try {
+      widgetRef.current.setSymbol(config.symbol, config.interval || "1D");
+    } catch {}
+  }, [config.symbol]);
 
   return containerRef;
-};
-
-export default useMvTradingViewWidget;
+}

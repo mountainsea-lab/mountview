@@ -98,7 +98,6 @@ export const MARKET_OVERVIEW_WIDGET_CONFIG = {
 
 import { UDFCompatibleDatafeed } from "../datafeeds/udf-compatible-datafeed";
 
-export const DATAFEED_URL = "http://localhost:5000";
 // Mv TradingView Charts
 export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
   symbol: string = "BINANCE:BTCUSDT",
@@ -111,13 +110,16 @@ export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
     timezone: "Asia/Shanghai",
     theme: "dark",
     locale: "zh",
-    container_id: `mv_chart_container_${symbol}`,
-    fullscreen: false,
+    fullscreen: true,
     autosize: true,
     height: 600,
     width: "100%",
+    library_path: "/charting_library/", // ✅ 关键
+    client_id: "sssddkk", // 可自定义，非空
+    user_id: "1", // 可自定义，非空
+    user_name: "test", // 可自定义，非空
     datafeed: isBrowser
-      ? new UDFCompatibleDatafeed("http://localhost:5000")
+      ? new UDFCompatibleDatafeed("http://localhost:10099")
       : null,
     disabled_features: [
       "use_localstorage_for_settings",
@@ -148,7 +150,6 @@ export const MV_MARKET_OVERVIEW_WIDGET_CONFIG = (
       "volume.volume.color.1": "#0FEDBE",
     },
     custom_indicators_getter: async () => [],
-    custom_css_url: "/charting_library/custom-theme.css",
     toolbar_bg: "#1a1a1a",
     drawings_access: {
       type: "black",
